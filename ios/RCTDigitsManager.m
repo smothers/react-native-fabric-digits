@@ -99,9 +99,15 @@ RCT_REMAP_METHOD(launchAuthentication,
                 reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
             } else {
                 Digits *digits = [Digits sharedInstance];
-                DGTOAuthSigning *oauthSigning = [[DGTOAuthSigning alloc] initWithAuthConfig:digits.authConfig authSession:session];
-                NSDictionary *authHeaders = [oauthSigning OAuthEchoHeadersToVerifyCredentials];
-                resolve(authHeaders);
+                NSDictionary *auth = @{
+                                   @"consumerKey": [[digits authConfig] consumerKey],
+                                   @"consumerSecret": [[digits authConfig] consumerSecret],
+                                   @"authToken": session.authToken,
+                                   @"authTokenSecret": session.authTokenSecret,
+                                   @"userId": session.userID,
+                                   @"phoneNumber": session.phoneNumber
+                                   };
+                resolve(auth);
             }
         }];
     });
@@ -117,6 +123,8 @@ RCT_EXPORT_METHOD(sessionDetails:(RCTResponseSenderBlock)callback) {
         NSDictionary *events = @{
                                  @"userID": session.userID,
                                  @"phoneNumber": session.phoneNumber,
+                                 @"authToken": session.authToken,
+                                 @"authTokenSecret": session.authTokenSecret,
                                  };
         callback(@[[NSNull null], events]);
     } else {
